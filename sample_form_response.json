@@ -1,0 +1,8 @@
+{
+  "FirstName": "John",
+  "LastName": "Doe",
+  "Email": "john.doe@example.com",
+  "JobTitle": "Software Engineer",
+  "Department": "Engineering",
+  "StartDate": "2025-06-15"
+}

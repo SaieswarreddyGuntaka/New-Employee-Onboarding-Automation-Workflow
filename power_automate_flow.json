@@ -1,0 +1,66 @@
+{
+  "name": "Onboarding_Automation_Flow",
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "actions": {
+      "Create_User": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": { "connectionName": "azuread", "operationId": "CreateUser", "apiId": "/providers/Microsoft.PowerApps/apis/azuread" },
+          "parameters": {
+            "accountEnabled": true,
+            "displayName": "@{triggerBody()['FirstName']} @{triggerBody()['LastName']}",
+            "mailNickname": "@{triggerBody()['FirstName']}",
+            "userPrincipalName": "@{triggerBody()['Email']}",
+            "passwordProfile": {
+              "forceChangePasswordNextSignIn": true,
+              "password": "Welcome@123"
+            }
+          }
+        }
+      },
+      "Send_Welcome_Email": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": { "connectionName": "office365", "operationId": "SendEmail", "apiId": "/providers/Microsoft.PowerApps/apis/office365" },
+          "parameters": {
+            "To": "@{triggerBody()['Email']}",
+            "Subject": "Welcome to the Company!",
+            "Body": "<html><body><h2>Welcome @{triggerBody()['FirstName']}!</h2><p>Your journey begins here.</p></body></html>"
+          }
+        }
+      },
+      "Post_To_Teams": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": { "connectionName": "teams", "operationId": "PostMessageToChannel", "apiId": "/providers/Microsoft.PowerApps/apis/teams" },
+          "parameters": {
+            "teamId": "TEAM_ID",
+            "channelId": "CHANNEL_ID",
+            "message": "New hire alert! @{triggerBody()['FirstName']} @{triggerBody()['LastName']} is joining as @{triggerBody()['JobTitle']} on @{triggerBody()['StartDate']}!"
+          }
+        }
+      }
+    },
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "FirstName": { "type": "string" },
+              "LastName": { "type": "string" },
+              "Email": { "type": "string" },
+              "JobTitle": { "type": "string" },
+              "StartDate": { "type": "string" }
+            },
+            "required": ["FirstName", "LastName", "Email"]
+          }
+        }
+      }
+    },
+    "outputs": {}
+  }
+}
